@@ -4,17 +4,17 @@ import json
 
 def handler(request):
     try:
-        # ✅ query params (safe way)
-        query = request.query
-        rc = query.get("rc")
+        # ✅ Query param safely get
+        rc = request.query.get("rc")
 
         if not rc:
             return {
                 "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
                 "body": json.dumps({"error": "RC parameter required"})
             }
 
-        rc = rc.upper()
+        rc = rc.strip().upper()
 
         payload = {
             "regNo": rc,
@@ -39,6 +39,7 @@ def handler(request):
 
         return {
             "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
             "body": json.dumps({
                 "success": True,
                 "rc": rc,
@@ -49,6 +50,7 @@ def handler(request):
     except Exception as e:
         return {
             "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
             "body": json.dumps({
                 "success": False,
                 "error": str(e)
