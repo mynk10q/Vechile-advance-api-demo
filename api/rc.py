@@ -4,20 +4,21 @@ import json
 
 def handler(request):
     try:
-        # 🔹 GET param ?rc=HR26XXXX
-        rc_number = request.args.get("rc")
+        # ✅ query params (safe way)
+        query = request.query
+        rc = query.get("rc")
 
-        if not rc_number:
+        if not rc:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"error": "RC number required"})
+                "body": json.dumps({"error": "RC parameter required"})
             }
 
-        session_id = f"{uuid.uuid4()}-{uuid.uuid4()}"
+        rc = rc.upper()
 
         payload = {
-            "regNo": rc_number.strip().upper(),
-            "sessionid": session_id
+            "regNo": rc,
+            "sessionid": str(uuid.uuid4())
         }
 
         headers = {
@@ -34,13 +35,22 @@ def handler(request):
             timeout=15
         )
 
+        data = response.json()
+
         return {
             "statusCode": 200,
-            "body": json.dumps(response.json())
+            "body": json.dumps({
+                "success": True,
+                "rc": rc,
+                "data": data
+            })
         }
 
     except Exception as e:
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
+            "body": json.dumps({
+                "success": False,
+                "error": str(e)
+            })
         }
